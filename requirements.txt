@@ -1,0 +1,4 @@
+pandasai==1.4.10
+streamlit
+pandas
+python-dotenv
