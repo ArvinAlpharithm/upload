@@ -1,4 +1,4 @@
-import streamlit as st 
+import streamlit as st
 from pandasai.llm.openai import OpenAI
 from dotenv import load_dotenv
 import os
@@ -35,4 +35,8 @@ if input_csv is not None:
             if st.button("Chat with CSV"):
                 with st.spinner("Generating answer..."):
                     result = chat_with_csv(data, input_text)
-                st.success(result)
+                    if isinstance(result, pd.DataFrame):
+                        st.dataframe(result, use_container_width=True)
+                    else:
+                        # If result is not a DataFrame, display it as text
+                        st.text(result)
