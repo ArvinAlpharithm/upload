@@ -2,5 +2,5 @@ pandasai
 streamlit
 pandas==1.5.3
 python-dotenv
-numpy
+numpy==1.21.0
 pydantic==1.10.17
