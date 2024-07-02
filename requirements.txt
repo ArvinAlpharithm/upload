@@ -1,5 +1,5 @@
 pandasai==1.4.10
 streamlit
-pandas==1.5.3
-numpy==1.21.0
+pandas
 python-dotenv
+numpy
