@@ -1,4 +1,6 @@
+pandasai
 streamlit
 pandas
-pandasai
-yaml
+python-dotenv
+numpy
+pydantic
