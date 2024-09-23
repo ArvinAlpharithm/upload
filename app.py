@@ -1,41 +1,54 @@
-import streamlit as st
 import os
+import streamlit as st
 import pandas as pd
-from pandasai.llm.openai import OpenAI
-from pandasai import PandasAI
+from langchain_groq import ChatGroq
+from langchain.agents.agent_types import AgentType
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
 
-# Fetch the Groq API key from the environment variable
-groq_api_key = os.environ.get("GROQ_API_KEY")
+# Hardcode the API Key for Groq
+os.environ["GROQ_API_KEY"] = "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"
 
-def chat_with_csv(df, prompt):
-    # Initialize Groq client with the appropriate base URL and API key
-    llm = OpenAI(base_url="https://api.groq.com/openai/v1", api_key=groq_api_key)
-    pandas_ai = PandasAI(llm)
-    result = pandas_ai.run(df, prompt=prompt)
-    return result
+# Initialize the Groq LLM
+llm = ChatGroq(
+    temperature=0,
+    model_name="mixtral-8x7b-32768"  # Replace with your desired model
+)
 
-st.set_page_config(layout='wide')
+# Streamlit app title
+st.title("CSV Query Agent with Groq")
 
-input_csv = st.file_uploader("Upload your CSV file", type=['csv'])
+# Define the path to your CSV file
+csv_file_path = "data.csv"  # Update the path as necessary
 
-if input_csv is not None:
-    col1, col2 = st.columns([1, 1])
+# Load the CSV content as a DataFrame
+try:
+    df = pd.read_csv(csv_file_path)
+    st.write("Data Preview:")
+    st.dataframe(df.head())  # Display the first few rows of the dataframe
 
-    with col1:
-        st.info("CSV Uploaded Successfully")
-        data = pd.read_csv(input_csv)
-        st.dataframe(data, use_container_width=True)
+    # Create the CSV agent using the file path instead of the DataFrame
+    csv_agent = create_csv_agent(
+        llm,
+        csv_file_path,  # Pass the path to the CSV file
+        verbose=True,
+        agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+        allow_dangerous_code=True  # Enable for advanced code execution
+    )
 
-    with col2:
-        st.info("Chat Below")
-        input_text = st.text_area("Enter your query")
+    # Input for user query
+    user_query = st.text_input("Enter your query:")
 
-        if input_text:
-            if st.button("Chat with CSV"):
-                with st.spinner("Generating answer..."):
-                    result = chat_with_csv(data, input_text)
-                    if isinstance(result, pd.DataFrame):
-                        st.dataframe(result, use_container_width=True)
-                    else:
-                        # If result is not a DataFrame, display it as text
-                        st.text(result)
+    if st.button("Submit"):
+        if user_query:
+            # Example query to interact with the data
+            response = csv_agent(user_query)
+            st.write("Response:")
+            st.write(response)
+        else:
+            st.warning("Please enter a query to submit.")
+except FileNotFoundError:
+    st.error("Error: The specified CSV file could not be found.")
+except pd.errors.EmptyDataError:
+    st.error("Error: The CSV file is empty or cannot be parsed.")
+except Exception as e:
+    st.error(f"An error occurred: {e}")
