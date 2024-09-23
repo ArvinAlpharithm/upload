@@ -1,6 +1,5 @@
-pandasai==1.4.10
 streamlit
-pandas==1.5.3
-python-dotenv
-numpy==1.26.4
-pydantic==1.10.17
+pandas
+langchain
+langchain-groq
+langchain-experimental
