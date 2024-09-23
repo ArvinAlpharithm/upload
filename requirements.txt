@@ -1,5 +1,6 @@
 streamlit
 pandas
 python-dotenv
-pandasai
-langchain_groq
+langchain
+langchain-groq
+langchain-experimental
