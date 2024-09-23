@@ -1,20 +1,31 @@
 import streamlit as st
-from pandasai.llm.openai import OpenAI
+from dotenv import load_dotenv
 import os
 import pandas as pd
-from pandasai import PandasAI
+from pandasai import SmartDataframe
+from langchain_groq.chat_models import ChatGroq
 
-# Hardcoded OpenAI API key
-openai_api_key = "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"
+# Load environment variables from .env (like GROQ_API_KEY)
+load_dotenv(override=True)
 
+# Set up the Groq LLM
+groq_api_key = os.getenv("GROQ_API_KEY")  # Store your Groq API key in a .env file
+llm = ChatGroq(model_name="mixtral-8x7b-32768", api_key=groq_api_key)
+
+# Function to chat with the CSV file using PandasAI
 def chat_with_csv(df, prompt):
-    llm = OpenAI(api_token=openai_api_key)
-    pandas_ai = PandasAI(llm)
-    result = pandas_ai.run(df, prompt=prompt)
+    # Create a SmartDataframe and pass the Groq LLM
+    smart_df = SmartDataframe(df, config={"llm": llm})
+    
+    # Use the PandasAI SmartDataframe to process the prompt
+    result = smart_df.chat(prompt)
+    
     return result
 
+# Streamlit app setup
 st.set_page_config(layout='wide')
 
+# File uploader to upload CSV files
 input_csv = st.file_uploader("Upload your CSV file", type=['csv'])
 
 if input_csv is not None:
